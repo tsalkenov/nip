@@ -1,6 +1,6 @@
 use std::{
     env, fs,
-    os::unix::{self, ffi::OsStringExt},
+    os::unix,
     path::{Path, PathBuf},
     process::Command,
 };
