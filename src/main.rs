@@ -2,7 +2,7 @@ use std::{
     env, fs,
     os::unix,
     path::{Path, PathBuf},
-    process::Command,
+    process::{Command, Stdio},
 };
 
 use anyhow::Context;
@@ -25,9 +25,10 @@ fn build_and_save(nix_file: PathBuf) -> anyhow::Result<()> {
             nix_file.file_name().unwrap().to_str().unwrap(),
             "--no-out-link",
         ])
+        .stderr(Stdio::inherit())
         .output()?;
     let store_path = PathBuf::from(String::from_utf8(build_res.stdout)?.trim());
-    let shell_link = Path::new(STATE_DIR).join(store_path.file_name().unwrap());
+    let shell_link = Path::new(STATE_DIR).join(store_path.file_name().context("Could not get build path from build command")?);
 
     if shell_link.exists() {
         fs::remove_file(&shell_link)?;
