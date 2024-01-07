@@ -4,6 +4,8 @@ Wrapper for nix-shell which adds persistence(protection from nix gc)
 
 ## Usage
 
+Start nix-shell in current directory and save it:
+
 ```bash
 nip # Yeah that's all
 ```
