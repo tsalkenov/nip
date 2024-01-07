@@ -1,6 +1,5 @@
 use std::{
     env, fs,
-    os::unix,
     path::{Path, PathBuf},
     process::{Command, Stdio},
 };
@@ -28,12 +27,22 @@ fn build_and_save(nix_file: PathBuf) -> anyhow::Result<()> {
         .stderr(Stdio::inherit())
         .output()?;
     let store_path = PathBuf::from(String::from_utf8(build_res.stdout)?.trim());
-    let shell_link = Path::new(STATE_DIR).join(store_path.file_name().context("Could not get build path from build command")?);
+    let shell_link = Path::new(STATE_DIR).join(
+        store_path
+            .file_name()
+            .context("Could not get build path from build command")?,
+    );
 
     if shell_link.exists() {
         fs::remove_file(&shell_link)?;
     }
-    unix::fs::symlink(&store_path, &shell_link)?;
+
+    Command::new("nix-store").args([
+        "--add-root",
+        &shell_link.to_string_lossy(),
+        "--realise",
+        &store_path.to_string_lossy(),
+    ]).spawn()?;
 
     fs::write(Path::new(HASH_FILE), Sha256::digest(fs::read(nix_file)?))?;
 
