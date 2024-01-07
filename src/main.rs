@@ -46,7 +46,8 @@ fn main() -> anyhow::Result<()> {
         .dir
         .read_dir()?
         .filter_map(Result::ok)
-        .filter_map(|e| String::from_utf8(e.file_name().into_vec()).ok())
+        .filter(|e| e.file_type().map(|t| t.is_file()).unwrap_or(false))
+        .filter_map(|e| e.file_name().to_str().map(str::to_owned))
         .find(|file_name| file_name.ends_with("nix"))
         .context("Nix file not found")?;
 
