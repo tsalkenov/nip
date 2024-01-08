@@ -55,7 +55,7 @@ fn main() -> anyhow::Result<()> {
     let nix_file = cli
         .dir
         .read_dir()?
-        .filter_map(Result::ok)
+        .flatten()
         .filter(|e| e.file_type().map(|t| t.is_file()).unwrap_or(false))
         .filter_map(|e| e.file_name().to_str().map(str::to_owned))
         .find(|file_name| file_name.ends_with("nix"))
